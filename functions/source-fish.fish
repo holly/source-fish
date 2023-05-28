@@ -15,7 +15,7 @@ function source-fish -d "Source fish files under the current directory"
     set --local ca (set_color cyan)
 
     set --local directory $argv # input arguments
-    set --local max_find_depth "-3" # find depth
+    set --local max_find_depth "3" # find depth
     set --local list_source_files
     # comment or question word
     set --local comment_found "found fish files:"
@@ -35,30 +35,30 @@ function source-fish -d "Source fish files under the current directory"
         ### trim last slash character
         set --local list_replaced (string replace --all -r "/\$" "" $directory)
         for i in (seq 1 (count $list_replaced))
-            set -a list_source_files (command find . -depth $max_find_depth -type f -path "./$list_replaced[$i]/*.fish")
+            set -a list_source_files (command find . -maxdepth $max_find_depth -type f -path "./$list_replaced[$i]/*.fish")
         end
         set question_source "Source these fish files? [Y/n]: "
     else if set -q _flag_recent
-        set -a list_source_files (command find . -type f -depth $max_find_depth -path "*.fish" -mmin "-60")
+        set -a list_source_files (command find . -maxdepth $max_find_depth -type f -path "*.fish" -mmin "-60")
         set comment_found "found fish files modified in the last hour:"
         set question_source "Source these fish files? [Y/n]: "
     else if set -q _flag_all
         ## find all fish files and try to soruce interactively (find max depth -3)
         set --local display_depth_num (string trim -lc "-" -- $max_find_depth)
-        set -a list_source_files (command find . -depth $max_find_depth -type f -name "*.fish")
+        set -a list_source_files (command find . -maxdepth $max_find_depth -type f -name "*.fish")
         set question_source "Source all fish files? [Y/n]: "
     else if set -q _flag_test
         ## find "test" directory, and source fish files in the directory
-        set -a list_source_files (command find . -type f -depth $max_find_depth -path "./test/*.fish")
-        set -a list_source_files (command find . -type f -depth $max_find_depth -path "./tests/*.fish")
+        set -a list_source_files (command find . -maxdepth $max_find_depth  -type f -path "./test/*.fish")
+        set -a list_source_files (command find . -maxdepth $max_find_depth -type f -path "./tests/*.fish")
         # set -a list_source_files (command find . -type f -depth $max_find_depth -name "*test.fish")
         set comment_found "found test files:"
         set question_source "Source test fish files in this project? [Y/n]: "
     else
         ## no option flags & no arguments
-        set -a list_source_files (command find . -type f -depth $max_find_depth -path "./functions/*.fish")
-        set -a list_source_files (command find . -type f -depth $max_find_depth -path "./completions/*.fish")
-        set -a list_source_files (command find . -type f -depth $max_find_depth -path "./conf.d/*.fish")
+        set -a list_source_files (command find . -maxdepth $max_find_depth -type f -path "./functions/*.fish")
+        set -a list_source_files (command find . -maxdepth $max_find_depth -type f -path "./completions/*.fish")
+        set -a list_source_files (command find . -maxdepth $max_find_depth -type f -path "./conf.d/*.fish")
         set question_source "Source fish files in this project? [Y/n]: "
     end
 
@@ -96,10 +96,10 @@ function __source-fish_config
             read -l -P "Config [r:recent | a:all | d:dir | o:open | e:exit]: " choice
             switch "$choice"
                 case R r recent
-                    set list_config_files (command find "$__fish_config_dir" -type f -depth "-3" -name "*.fish" -mmin "-60")
+                    set list_config_files (command find "$__fish_config_dir" -maxdepth 3 -type f  -name "*.fish" -mmin "-60")
                     break
                 case A a all
-                    set list_config_files (command find "$__fish_config_dir" -type f -depth "-3" -name "*.fish")
+                    set list_config_files (command find "$__fish_config_dir" -maxdepth 3 -type f -name "*.fish")
                     break
                 case O o open
                     set --local filer_flag "false"
@@ -135,19 +135,19 @@ function __source-fish_config
                         read -l -P "Directory [t:top | c:conf | f:functons | p:completions | b:back | e:exit ]: " select_dir
                         switch "$select_dir"
                             case T t top
-                                set list_config_files (command find "$__fish_config_dir" -type f -depth "1" -name "*.fish")
+                                set list_config_files (command find "$__fish_config_dir" -maxdepth 1 -type f -name "*.fish")
                                 set loop_exit_flag "exit"
                                 break
                             case C c conf
-                                set list_config_files (command find "$__fish_config_dir/conf.d" -type f -depth "1" -name "*.fish")
+                                set list_config_files (command find "$__fish_config_dir/conf.d" -maxdepth 1 -type f -name "*.fish")
                                 set loop_exit_flag "exit"
                                 break
                             case F f functions
-                                set list_config_files (command find "$__fish_config_dir/functions" -type f -depth "1" -name "*.fish")
+                                set list_config_files (command find "$__fish_config_dir/functions" -maxdepth 1  -type f -name "*.fish")
                                 set loop_exit_flag "exit"
                                 break
                             case P p completions
-                                set list_config_files (command find "$__fish_config_dir/completions" -type f -depth "1" -name "*.fish")
+                                set list_config_files (command find "$__fish_config_dir/completions" -maxdepth 1 -type f -name "*.fish")
                                 set loop_exit_flag "exit"
                                 break
                             case B b back
